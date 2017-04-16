@@ -1,21 +1,31 @@
+#!/usr/bin/env python
 # coding: latin-1
 
+"""
+Displays VPN connection status in the System bar and lets user connect / disconnect from vpn
+"""
 
 import os
 import signal
 import subprocess
-import threading
 
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import AppIndicator3 as appindicator
 from gi.repository import Gtk as gtk
 from gi.repository import Notify as notify
+from gi.repository import GLib as glib
 
 
 class Widget:
     APPINDICATOR_ID = 'ubuntu_widget_status'
-    ICON_ON = os.path.abspath("on.svg")
-    ICON_OFF = os.path.abspath("off.svg")
+    BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+    ICON_ON = os.path.join(BASE_DIR, "on.svg")
+    ICON_OFF = os.path.join(BASE_DIR, "off.svg")
     CONNECTED_STRING = "Connected to "
+    CONNECT_CMD = ["expressvpn", "connect", "smart"]
+    DISCONNECT_CMD = ["expressvpn", "disconnect"]
+    UPDATE_FREQUENCY = 30
 
     def __init__(self):
         self.indicator = None
@@ -24,6 +34,12 @@ class Widget:
 
     def build_menu(self):
         menu = gtk.Menu()
+        item_status = gtk.MenuItem('Connect')
+        item_status.connect('activate', self.connect)
+        menu.append(item_status)
+        item_status = gtk.MenuItem('Disconnect')
+        item_status.connect('activate', self.disconnect)
+        menu.append(item_status)
         item_status = gtk.MenuItem('Force Status Update')
         item_status.connect('activate', self.set_status)
         menu.append(item_status)
@@ -34,36 +50,62 @@ class Widget:
         return menu
 
     def main(self):
-        self.indicator = appindicator.Indicator.new(self.APPINDICATOR_ID, gtk.STOCK_INFO, appindicator.IndicatorCategory.SYSTEM_SERVICES)
         self.indicator = appindicator.Indicator.new(self.APPINDICATOR_ID, self.ICON_OFF, appindicator.IndicatorCategory.SYSTEM_SERVICES)
         self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
         self.indicator.set_menu(self.build_menu())
+
         #This sets the handler for “INT” signal processing
         #- the one issued by the OS when “Ctrl+C” is typed.
         #The handler we assign to it is the “default” handler, which,
         #in case of the interrupt signal, is to stop execution.
         signal.signal(signal.SIGINT, signal.SIG_DFL) #listen to quit signal
+
         notify.init(self.APPINDICATOR_ID)
-        self.set_status(None)
-        #self.timer = threading.Timer(5.0, self.set_status(None))
-        #self.timer.start()
+        self.update()
+        glib.timeout_add_seconds(self.UPDATE_FREQUENCY, self.update)
         gtk.main()
 
+
+    def update(self):
+        self.set_status(None)
+        return True
+
     def quit(self, source):
-        self.timer.cancel()
+        if self.timer:
+            self.timer.cancel()
         notify.uninit()
         gtk.main_quit()
 
-    def set_status(self,_):
-        print("setting status...")
+    def connect(self, _):
+        notify.Notification.new("<b>Connection Status</b>", "Connecting..", None).show()
+        ret = subprocess.call(self.CONNECT_CMD)
+        if ret:
+            notify.Notification.new("<b>Connection Status</b>",
+                                    "Error trying connect. Please check next connection update to verify the status.",
+                                    None).show()
+        self.update()
+
+    def disconnect(self, _):
+        notify.Notification.new("<b>Connection Status</b>", "Disconnecting..", None).show()
+        ret = subprocess.call(self.DISCONNECT_CMD)
+        if ret:
+            notify.Notification.new("<b>Connection Status</b>",
+                                    "Error trying to disconnect. Please check next connection update to verify the status.",
+                                    None).show()
+        self.update()
+
+    def set_status(self, _):
         status = self.get_connection_status()
+        print(status)
+        current_status = self.connection_status
         if self.CONNECTED_STRING == status[0:len(self.CONNECTED_STRING)]:
             self.connection_status = 1
             self.indicator.set_icon(self.ICON_ON)
         else:
             self.connection_status = 0
             self.indicator.set_icon(self.ICON_OFF)
-        notify.Notification.new("<b>Connection Status</b>", status, None).show()
+        if current_status != self.connection_status:
+            notify.Notification.new("<b>Connection Status</b>", status, None).show()
 
     def get_connection_status(self):
         return subprocess.check_output(["expressvpn", "status"])
