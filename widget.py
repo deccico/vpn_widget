@@ -2,7 +2,8 @@
 # coding: latin-1
 
 """
-Displays VPN connection status in the System bar and lets user connect / disconnect from vpn
+Displays VPN connection status in the System bar and lets user connect / disconnect from vpn.
+It also connects automatically to the vpn.
 
 To automatically start this script, please check the link below
 https://askubuntu.com/questions/48321/how-do-i-start-applications-automatically-on-login
@@ -30,6 +31,7 @@ class Widget:
     CONNECT_CMD = ["expressvpn", "connect", "smart"]
     DISCONNECT_CMD = ["expressvpn", "disconnect"]
     UPDATE_FREQUENCY = 30
+    AUTO_CONNECT = True
 
     def __init__(self):
         self.indicator = None
@@ -105,6 +107,9 @@ class Widget:
         status = self._update_status()
         if current_status != self.connection_status:
             notify.Notification.new("<b>Connection Status</b>", status, None).show()
+        if not current_status and self.AUTO_CONNECT:
+            #run without waiting
+            subprocess.Popen(self.CONNECT_CMD)
         return True
 
 
