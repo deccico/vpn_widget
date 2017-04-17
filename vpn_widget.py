@@ -25,8 +25,8 @@ from gi.repository import GLib as glib
 class Widget:
     APPINDICATOR_ID = 'ubuntu_widget_status'
     BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-    ICON_ON = os.path.join(BASE_DIR, "on.svg")
-    ICON_OFF = os.path.join(BASE_DIR, "off.svg")
+    ICON_ON = os.path.join(BASE_DIR, "icon_on.svg")
+    ICON_OFF = os.path.join(BASE_DIR, "icon_off.svg")
     CONNECTED_STRING = "Connected to "
     CONNECT_CMD = ["expressvpn", "connect", "smart"]
     DISCONNECT_CMD = ["expressvpn", "disconnect"]
