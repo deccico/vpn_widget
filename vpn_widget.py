@@ -46,7 +46,7 @@ class Widget:
         item_status = gtk.MenuItem('Disconnect')
         item_status.connect('activate', self.disconnect)
         menu.append(item_status)
-        item_status = gtk.MenuItem('Update Connection Status')
+        item_status = gtk.MenuItem('Display Connection Status')
         item_status.connect('activate', self.get_status)
         menu.append(item_status)
         item_quit = gtk.MenuItem('Quit')
