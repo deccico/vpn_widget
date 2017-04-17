@@ -26,9 +26,16 @@ and inspiration ahead of me I decided to fix that.
 # The results
 
 I have to say I'm happy with the outcome. The code is short and sweet and Python and Gtk were all I needed to use.
-This is what it looks like after installed: ![alt text](img/markdown_logo.png)
+This is what it looks like after installed: ![screenshot](https://gitlab.com/deccico/status_ubuntu_widget/blob/master/Screenshot.png)
+
 
 # Installation
 
+An easy way to install this project is to clone it and then follow the instructions here: https://askubuntu.com/questions/48321/how-do-i-start-applications-automatically-on-login
+to automatically run it every time you log in.
+
 # Next steps
 
+* Create an automatic installer
+* Support other vpn's (but Private Internet Access has something similar...)
+* Add menu to setup other ExpressVPN options like country to connect to, protocol, etc.
