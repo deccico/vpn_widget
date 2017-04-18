@@ -26,7 +26,7 @@ and inspiration ahead of me I decided to fix that.
 # The results
 
 I have to say I'm happy with the outcome. The code is short and sweet and Python and Gtk were all I needed to use.
-This is what it looks like after installed: ![screenshot](https://gitlab.com/deccico/status_ubuntu_widget/blob/master/Screenshot.png)
+This is what it looks like after installed: ![screenshot](https://raw.githubusercontent.com/deccico/vpn_widget/master/Screenshot.png)
 
 
 # Installation
